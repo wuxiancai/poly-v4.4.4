@@ -71,6 +71,10 @@ pip3 install --no-cache-dir selenium
 pip3 install --no-cache-dir pyautogui
 pip3 install --no-cache-dir screeninfo
 pip3 install --no-cache-dir pytesseract
+pip3 install --no-cache-dir opencv-python-headless  # 安装headless版本，通常更稳定
+
+
+
 # 配置 Python 环境变量 (避免重复添加)
 echo "配置环境变量..."
 if ! grep -q "# Python 配置" ~/.zshrc; then
