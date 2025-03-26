@@ -125,16 +125,15 @@ class XPathConfig:
 
     # 19.Cash值长期有效
     CASH_VALUE = [
+        '//button[.//p[text()="Cash"]]/p[contains(text(), "$")]',
         '(//span[@class="c-PJLV c-jaFKlk c-PJLV-ibdakYG-css"])[2]',
-        '//button[.//span[text()="Cash"]]/span[contains(text(), "$")]', 
-        '/html/body/div[1]/div[2]/nav[1]/div[1]/div[3]/div/nav/div/ul/div[1]/button[1]/span[1]'
+        '//button[.//span[text()="Cash"]]/span[contains(text(), "$")]'
     ]
 
     # 20.History-交易记录长期有效
     HISTORY = [
         '(//div[@class="PJLV PJLV-ihovmxi-css"])[1]',
         '(//div[@class="PJLV PJLV-ihovmxi-css"]//p)[1]', 
-        
         '/html/body/div[1]/div[2]/div/div/main/div/div/div/div/div/div[3]/div/div[5]/div/div[2]/div/p'  
     ]
     
