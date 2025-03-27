@@ -146,7 +146,7 @@ class XPathConfig:
 
     # 22.Portfolio_button长期有效
     PORTFOLIO_BUTTON = [
-        '//button[@href="/portfolio"]' 
+        '//button[@href="/portfolio"]',
         '//a[@href="/portfolio"]' 
     ]
 
