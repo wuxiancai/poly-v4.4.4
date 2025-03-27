@@ -1464,6 +1464,8 @@ class CryptoTrader:
             # 区域参数格式为(left, top, width, height)
             right_top_region = (screen_width - 400, 0, 400, 600)  # 右上角500x700像素区域
             screen = pyautogui.screenshot(region=right_top_region)
+            # 保存截图
+            screen.save("screenshot.png")
             time.sleep(1)
             # 使用OCR识别文本
             text_chi_sim = pytesseract.image_to_string(screen, lang='chi_sim')
