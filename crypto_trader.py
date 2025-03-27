@@ -990,6 +990,7 @@ class CryptoTrader:
                 # 按下Enter键
                 pyautogui.press('enter')
                 time.sleep(1)
+                
                 # 1. 按5次TAB
                 for _ in range(5):
                     pyautogui.press('tab')
@@ -1081,10 +1082,10 @@ class CryptoTrader:
                 else:
                     self.update_status("无法获取价格数据")  
             except Exception as e:
-                self.logger.error(f"价格获取失败: {str(e)}")
-                self.update_status(f"价格获取失败: {str(e)}")
-                self.yes_price_label.config(text="Yes: 获取失败", foreground='red')
-                self.no_price_label.config(text="No: 获取失败", foreground='red')
+                self.logger.error(f"Fail: {str(e)}")
+                self.update_status(f"Fail: {str(e)}")
+                self.yes_price_label.config(text="Yes: Fail", foreground='red')
+                self.no_price_label.config(text="No: Fail", foreground='red')
                 self.root.after(3000, self.check_prices)
         except Exception as e:
             self.logger.error(f"检查价格失败: {str(e)}")
@@ -1133,8 +1134,8 @@ class CryptoTrader:
                 
             except Exception as e:
                 self.logger.error(f"获取资金信息失败: {str(e)}")
-                self.portfolio_label.config(text="Portfolio: 获取失败")
-                self.cash_label.config(text="Cash: 获取失败")
+                self.portfolio_label.config(text="Portfolio: Fail")
+                self.cash_label.config(text="Cash: Fail")
                 self.root.after(3000, self.check_balance)
         except Exception as e:
             self.logger.error(f"检查资金失败: {str(e)}")
@@ -1454,33 +1455,62 @@ class CryptoTrader:
             # 使用 XPath 定位并点击 MetaMask 按钮
             metamask_button = self._find_element_with_retry(XPathConfig.METAMASK_BUTTON)
             metamask_button.click()
-
-            """屏幕分辨率必须设置为 1920*1080"""
-            # 获取主屏幕的宽度和高度
+            
+            # 获取屏幕尺寸
             monitor = get_monitors()[0]  # 获取主屏幕信息
             screen_width, screen_height = monitor.width, monitor.height
+            time.sleep(1)
+            # 截取屏幕右上角区域用于OCR识别
+            # 区域参数格式为(left, top, width, height)
+            right_top_region = (screen_width - 400, 0, 400, 600)  # 右上角500x700像素区域
+            screen = pyautogui.screenshot(region=right_top_region)
+            time.sleep(1)
+            # 使用OCR识别文本
+            text_chi_sim = pytesseract.image_to_string(screen, lang='chi_sim')
+            self.logger.info(f"OCR识别结果(中文): {text_chi_sim}")
+            time.sleep(3)
 
-            # 计算 MetaMask 弹窗的 "连接" 按钮位置
-            connect_button_x = screen_width - 95  # 按钮位于屏幕右侧，稍微向左偏移范围 92-120
-            connect_button_y = 600  # 观察图片后估算按钮的Y坐标,范围 590-620
-            time.sleep(2)
-            # 点击 "连接" 按钮
-            pyautogui.click(connect_button_x, connect_button_y) 
-            
-            # 计算 "确认" 按钮位置
-            confirm_button_x = screen_width - 95  # 同样靠右对齐
-            confirm_button_y = 600  # "确认" 按钮通常在下方
+            # 检查是否包含"欢迎回来!"
+            if "欢迎" in text_chi_sim or "回来" in text_chi_sim :
+                self.logger.info("检测到MetaMask登录窗口,显示'欢迎回来!'")
+                # 输入密码
+                pyautogui.write("noneboy780308")
+                time.sleep(2)
+                # 按下Enter键
+                pyautogui.press('enter')
+                time.sleep(3)
+                # 1. 按5次TAB
+                for _ in range(5):
+                    pyautogui.press('tab')
+                time.sleep(1)
+                # 按下Enter键
+                pyautogui.press('enter')
+                self.logger.info("MetaMask登录成功")
+                time.sleep(1)
+                self.driver.refresh()
+            else:
+                """屏幕分辨率必须设置为 1920*1080"""
+                # 计算 MetaMask 弹窗的 "连接" 按钮位置
+                connect_button_x = screen_width - 95  # 按钮位于屏幕右侧，稍微向左偏移范围 92-120
+                connect_button_y = 610  # 观察图片后估算按钮的Y坐标,范围 590-620
+                time.sleep(2)
+                # 点击 "连接" 按钮
+                pyautogui.click(connect_button_x, connect_button_y) 
+                
+                # 计算 "确认" 按钮位置
+                confirm_button_x = screen_width - 95  # 同样靠右对齐
+                confirm_button_y = 610  # "确认" 按钮通常在下方
+                time.sleep(2)
+                # 点击 "确认" 按钮
+                pyautogui.click(confirm_button_x, confirm_button_y)  # 点击 "确认" 按钮
 
-            time.sleep(2)
-            pyautogui.click(confirm_button_x, confirm_button_y)  # 点击 "确认" 按钮
-
-            # 直接执行click_accept_button
-            self.logger.info("✅ 登录完成,执行click_accept_button")
-            time.sleep(8)
-            self.driver.refresh()
-            self.click_accept_button()
-            
-            return True
+                # 直接执行click_accept_button
+                self.logger.info("✅ 登录完成,执行click_accept_button")
+                self.driver.refresh()
+                time.sleep(2)
+                self.click_accept_button()
+                
+                return True
         except Exception as e:
             self.logger.error(f"登录操作失败: {str(e)}")
             return False
@@ -1509,16 +1539,16 @@ class CryptoTrader:
             
             # 点击确认按钮
             self.buy_confirm_button.invoke()
-            time.sleep(0.5)
+            time.sleep(1)
             
             # 按ENTER确认
             pyautogui.press('enter')
             
             self.logger.info("✅ click_accept_button执行完成")
             self.driver.refresh()
-            # 延迟5秒启动URL监控    
+            # 启动URL监控    
             self.start_url_monitoring()
-            # 延迟10秒启动页面刷新
+            # 启动页面刷新
             self.refresh_page()
             
         except Exception as e:
