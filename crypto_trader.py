@@ -1399,7 +1399,6 @@ class CryptoTrader:
         if not self.driver:
             self.restart_browser()
             
-        self.login_running = True
         def check_login_status():
             if self.running and self.driver:
                 try:
@@ -1438,6 +1437,8 @@ class CryptoTrader:
         """执行登录操作"""
         try:
             self.logger.info("开始执行登录操作...")
+            self.login_running = True
+            
             if not self.driver:
                 self.restart_browser()
                 
