@@ -1465,6 +1465,7 @@ class CryptoTrader:
             right_top_region = (screen_width - 400, 0, 400, 600)  # 右上角500x700像素区域
             screen = pyautogui.screenshot(region=right_top_region)
             # 保存截图
+            time.sleep(3)
             screen.save("screenshot.png")
             time.sleep(1)
             # 使用OCR识别文本
