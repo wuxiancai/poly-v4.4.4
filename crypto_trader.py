@@ -1015,7 +1015,6 @@ class CryptoTrader:
                 self._reconnect_browser()
 
             if not self.driver:
-                self.logger.warning("浏览器连接丢失，尝试重新连接")
                 self.restart_browser()
                 
             # 添加URL检查
@@ -1096,7 +1095,8 @@ class CryptoTrader:
         """获取Portfolio和Cash值"""
         try:
             if not self.driver:
-                raise Exception("浏览器连接丢失")
+                self.restart_browser()
+
             # 等待页面完全加载
             WebDriverWait(self.driver, 10).until(
                 lambda driver: driver.execute_script('return document.readyState') == 'complete'
@@ -1290,7 +1290,9 @@ class CryptoTrader:
             if getattr(self, 'is_url_monitoring', False):
                 self.logger.debug("URL监控已在运行中")
                 return
-            
+            if not self.driver:
+                self.restart_browser()
+
             self.url_monitoring_running = True
             self.logger.info("✅ 启动URL监控")
 
@@ -1394,6 +1396,10 @@ class CryptoTrader:
     def start_login_monitoring(self):
         """启动登录状态监控"""
         self.logger.info("✅ 启动登录状态监控")
+        if not self.driver:
+            self.restart_browser()
+            
+        self.login_running = True
         def check_login_status():
             if self.running and self.driver:
                 try:
@@ -1416,7 +1422,6 @@ class CryptoTrader:
         """在单独线程中执行登录检查"""
         try:
             try:
-                
                 time.sleep(3)
                 if self.find_login_button():
                     self.logger.warning("检测到❌未登录状态，执行登录")
@@ -1433,7 +1438,11 @@ class CryptoTrader:
         """执行登录操作"""
         try:
             self.logger.info("开始执行登录操作...")
+            if not self.driver:
+                self.restart_browser()
+                
             self.start_login_monitoring_running = True
+            self.login_running = True
             self.stop_auto_find_coin()
             self.stop_url_monitoring()
             self.stop_refresh_page()
@@ -1455,7 +1464,7 @@ class CryptoTrader:
             # 使用 XPath 定位并点击 MetaMask 按钮
             metamask_button = self._find_element_with_retry(XPathConfig.METAMASK_BUTTON)
             metamask_button.click()
-            
+            time.sleep(5)
             # 获取屏幕尺寸
             monitor = get_monitors()[0]  # 获取主屏幕信息
             screen_width, screen_height = monitor.width, monitor.height
@@ -1464,13 +1473,9 @@ class CryptoTrader:
             # 区域参数格式为(left, top, width, height)
             right_top_region = (screen_width - 400, 0, 400, 600)  # 右上角500x700像素区域
             screen = pyautogui.screenshot(region=right_top_region)
-            # 保存截图
-            time.sleep(3)
-            screen.save("screenshot.png")
-            time.sleep(1)
+            time.sleep(2)
             # 使用OCR识别文本
             text_chi_sim = pytesseract.image_to_string(screen, lang='chi_sim')
-            self.logger.info(f"OCR识别结果(中文): {text_chi_sim}")
             time.sleep(3)
 
             # 检查是否包含"欢迎回来!"
@@ -1478,19 +1483,28 @@ class CryptoTrader:
                 self.logger.info("检测到MetaMask登录窗口,显示'欢迎回来!'")
                 # 输入密码
                 pyautogui.write("noneboy780308")
-                time.sleep(2)
+                time.sleep(1)
                 # 按下Enter键
                 pyautogui.press('enter')
                 time.sleep(3)
-                # 1. 按5次TAB
-                for _ in range(5):
-                    pyautogui.press('tab')
-                time.sleep(1)
-                # 按下Enter键
-                pyautogui.press('enter')
+                """屏幕分辨率必须设置为 1920*1080"""
+                # 计算 MetaMask 弹窗的 "连接" 按钮位置
+                connect_button_x = screen_width - 95  # 按钮位于屏幕右侧，稍微向左偏移范围 92-120
+                connect_button_y = 610  # 观察图片后估算按钮的Y坐标,范围 590-620
+                time.sleep(2)
+                # 点击 "连接" 按钮
+                pyautogui.click(connect_button_x, connect_button_y) 
+                
+                # 计算 "确认" 按钮位置
+                confirm_button_x = screen_width - 95  # 同样靠右对齐
+                confirm_button_y = 610  # "确认" 按钮通常在下方
+                time.sleep(2)
+                # 点击 "确认" 按钮
+                pyautogui.click(confirm_button_x, confirm_button_y) 
+
                 self.logger.info("MetaMask登录成功")
                 time.sleep(1)
-                self.driver.refresh()
+                
             else:
                 """屏幕分辨率必须设置为 1920*1080"""
                 # 计算 MetaMask 弹窗的 "连接" 按钮位置
@@ -1505,22 +1519,23 @@ class CryptoTrader:
                 confirm_button_y = 610  # "确认" 按钮通常在下方
                 time.sleep(2)
                 # 点击 "确认" 按钮
-                pyautogui.click(confirm_button_x, confirm_button_y)  # 点击 "确认" 按钮
+                pyautogui.click(confirm_button_x, confirm_button_y)  
 
                 # 直接执行click_accept_button
                 self.logger.info("✅ 登录完成,执行click_accept_button")
-                self.driver.refresh()
-                time.sleep(2)
+                time.sleep(1)
                 self.click_accept_button()
-                
                 return True
         except Exception as e:
             self.logger.error(f"登录操作失败: {str(e)}")
             return False
+        finally:
+            self.login_running = False
 
     def click_accept_button(self):
         """重新登录后,需要在amount输入框输入1并确认"""
         self.logger.info("开始执行click_accept_button")
+        self.login_running = True
         try:
             # 未登录,不执行click_accept_button
             if self.find_login_button():
@@ -1557,6 +1572,8 @@ class CryptoTrader:
         except Exception as e:
             self.logger.error(f"click_accept_button执行失败: {str(e)}")
             self.click_accept_button()
+        finally:
+            self.login_running = False
 
     # 添加刷新方法
     def refresh_page(self):
@@ -3236,7 +3253,11 @@ class CryptoTrader:
         # 未登录,不执行自动找币
         if self.find_login_button():
             self.check_and_handle_login()
-        
+
+        if self.login_running:
+            self.logger.info("正在登录,退出自动找币")
+            return
+
         if self.contrast_portfolio_cash():
             self.stop_url_monitoring()
             self.stop_refresh_page()
@@ -3317,19 +3338,23 @@ class CryptoTrader:
                 # 使用线程执行登录检查，避免阻塞主线程
                 self.auto_find_coin_timer = self.root.after(0, self.find_54_coin)
             else:
-                self.logger.info("❌ 当前不处于自动找币时段")
+                self.logger.info("当前不处于自动找币时段")
                 self.start_auto_find_coin_running = False
 
     def find_54_coin(self):
         """自动找币,线程名:self.auto_find_coin_timer"""
         self.logger.info("✅ 当前没有持仓,开始自动找币")
+        if self.login_running:
+            self.logger.info("正在登录,退出自动找币")
+            return
+
         try:
             self.stop_url_monitoring()
             self.stop_refresh_page()
             self.start_auto_find_coin_running = True
             
             if self.find_login_button():
-                self.logger.warning("检测到❌未登录状态，执行登录")
+                self.logger.warning("检测到未登录状态，执行登录")
                 self.check_and_handle_login()
 
             # 保存原始窗口句柄，确保在整个过程中有一个稳定的引用
@@ -3380,7 +3405,7 @@ class CryptoTrader:
                             # 保存当前 URL 到 config
                             self.config['website']['url'] = coin_new_weekly_url
                             self.save_config()
-                            self.logger.info(f"{coin}: YES{int(yes_price)}¢|NO{int(no_price)}¢✅ 符合要求,已保存到 config")
+                            self.logger.info(f"{coin}: YES {int(yes_price)}¢|NO {int(no_price)}¢ ✅ 符合要求,已保存到 config")
 
                             # 清除url_entry中的url
                             self.url_entry.delete(0, tk.END)
@@ -3394,7 +3419,7 @@ class CryptoTrader:
                             self.stop_auto_find_coin()  
                             return
                         else:
-                            self.logger.info(f"{coin}: YES{int(yes_price)}¢|NO{int(no_price)}¢❌ 不符合要求")           
+                            self.logger.info(f"{coin}: YES {int(yes_price)}¢|NO {int(no_price)}¢ ❌ 不符合要求")           
 
                 except Exception as e:
                     self.logger.error(f"处理{coin}时出错: {str(e)}")
@@ -3441,7 +3466,10 @@ class CryptoTrader:
         try:
             if self.trading:
                 return
-            
+
+            if self.login_running:
+                self.logger.info("正在登录,退出自动找币")
+                return
             # 保存当前窗口句柄作为局部变量，用于本方法内部使用
             original_tab = self.driver.current_window_handle
 
