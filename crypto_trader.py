@@ -82,6 +82,7 @@ class CryptoTrader:
         self.driver = None
         self.running = False
         self.trading = False
+        self.login_running = False
         # 添加交易状态
         self.stop_auto_find_running = False
         self.start_login_monitoring_running = False
@@ -1437,7 +1438,6 @@ class CryptoTrader:
         """执行登录操作"""
         try:
             self.logger.info("开始执行登录操作...")
-            self.login_running = True
             
             if not self.driver:
                 self.restart_browser()
@@ -3471,6 +3471,7 @@ class CryptoTrader:
             if self.login_running:
                 self.logger.info("正在登录,退出自动找币")
                 return
+                
             # 保存当前窗口句柄作为局部变量，用于本方法内部使用
             original_tab = self.driver.current_window_handle
 
