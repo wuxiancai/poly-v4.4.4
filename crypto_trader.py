@@ -978,28 +978,46 @@ class CryptoTrader:
             metamask_button.click()
             time.sleep(2)
 
-            # 截取屏幕
-            screen = pyautogui.screenshot()
+            # 获取屏幕尺寸
+            monitor = get_monitors()[0]  # 获取主屏幕信息
+            screen_width, screen_height = monitor.width, monitor.height
+            time.sleep(1)
+            # 截取屏幕右上角区域用于OCR识别
+            # 区域参数格式为(left, top, width, height)
+            right_top_region = (screen_width - 400, 0, 400, 600)  # 右上角500x700像素区域
+            screen = pyautogui.screenshot(region=right_top_region)
+            time.sleep(2)
             # 使用OCR识别文本
-            text = pytesseract.image_to_string(screen, lang='chi_sim')
+            text_chi_sim = pytesseract.image_to_string(screen, lang='chi_sim')
+            time.sleep(3)
+
             # 检查是否包含"欢迎回来!"
-            if "欢迎回来" in text:
+            if "欢迎" in text_chi_sim or "回来" in text_chi_sim :
                 self.logger.info("检测到MetaMask登录窗口,显示'欢迎回来!'")
                 # 输入密码
                 pyautogui.write("noneboy780308")
-                time.sleep(0.5)
-                # 按下Enter键
-                pyautogui.press('enter')
                 time.sleep(1)
-                
-                # 1. 按5次TAB
-                for _ in range(5):
-                    pyautogui.press('tab')
                 # 按下Enter键
                 pyautogui.press('enter')
+                time.sleep(3)
+                
+                """屏幕分辨率必须设置为 1920*1080"""
+                # 计算 MetaMask 弹窗的 "连接" 按钮位置
+                connect_button_x = screen_width - 95  # 按钮位于屏幕右侧，稍微向左偏移范围 92-120
+                connect_button_y = 610  # 观察图片后估算按钮的Y坐标,范围 590-620
+                time.sleep(2)
+                # 点击 "连接" 按钮
+                pyautogui.click(connect_button_x, connect_button_y) 
+                
+                # 计算 "确认" 按钮位置
+                confirm_button_x = screen_width - 95  # 同样靠右对齐
+                confirm_button_y = 610  # "确认" 按钮通常在下方
+                time.sleep(2)
+                # 点击 "确认" 按钮
+                pyautogui.click(confirm_button_x, confirm_button_y) 
+
                 self.logger.info("MetaMask登录成功")
                 time.sleep(1)
-                self.driver.refresh()
 
             self.start_url_monitoring()
             self.start_login_monitoring()
@@ -1509,15 +1527,15 @@ class CryptoTrader:
             else:
                 """屏幕分辨率必须设置为 1920*1080"""
                 # 计算 MetaMask 弹窗的 "连接" 按钮位置
-                connect_button_x = screen_width - 95  # 按钮位于屏幕右侧，稍微向左偏移范围 92-120
-                connect_button_y = 610  # 观察图片后估算按钮的Y坐标,范围 590-620
+                connect_button_x = screen_width - 105  # 按钮位于屏幕右侧，稍微向左偏移范围 92-120
+                connect_button_y = 605  # 观察图片后估算按钮的Y坐标,范围 590-620
                 time.sleep(2)
                 # 点击 "连接" 按钮
                 pyautogui.click(connect_button_x, connect_button_y) 
                 
                 # 计算 "确认" 按钮位置
-                confirm_button_x = screen_width - 95  # 同样靠右对齐
-                confirm_button_y = 610  # "确认" 按钮通常在下方
+                confirm_button_x = screen_width - 105  # 同样靠右对齐
+                confirm_button_y = 605  # "确认" 按钮通常在下方
                 time.sleep(2)
                 # 点击 "确认" 按钮
                 pyautogui.click(confirm_button_x, confirm_button_y)  
