@@ -1654,9 +1654,6 @@ class CryptoTrader:
     """以下代码是监控买卖条件及执行交易的函数,程序开始进入交易阶段,从 1468 行直到第 2224200 行"""  
     def First_trade(self):
         try:
-            if self.find_login_button():
-                self.logger.warning("检测到❌未登录状态，执行登录")
-                self.check_and_handle_login()
             # 获取当前Yes和No价格
             prices = self.driver.execute_script("""
                 function getPrices() {
@@ -1798,10 +1795,6 @@ class CryptoTrader:
     def Second_trade(self):
         """处理Yes2/No2的自动交易"""
         try:
-            if self.find_login_button():
-                self.logger.warning("检测到❌未登录状态，执行登录")
-                self.check_and_handle_login()
-            
             # 获取当前Yes和No价格
             prices = self.driver.execute_script("""
                 function getPrices() {
@@ -1927,10 +1920,6 @@ class CryptoTrader:
     def Third_trade(self):
         """处理Yes3/No3的自动交易"""
         try:
-            if self.find_login_button():
-                self.logger.warning("检测到❌未登录状态，执行登录")
-                self.check_and_handle_login()
-            
             # 获取当前Yes和No价格
             prices = self.driver.execute_script("""
                 function getPrices() {
@@ -2055,10 +2044,6 @@ class CryptoTrader:
     def Forth_trade(self):
         """处理Yes4/No4的自动交易"""
         try:
-            if self.find_login_button():
-                self.logger.warning("检测到❌未登录状态，执行登录")
-                self.check_and_handle_login()
-            
             # 获取当前Yes和No价格
             prices = self.driver.execute_script("""
                 function getPrices() {
@@ -2190,9 +2175,6 @@ class CryptoTrader:
     def Sell_yes(self):
         """当YES5价格等于实时Yes价格时自动卖出"""
         try:
-            if self.find_login_button():
-                self.logger.warning("检测到❌未登录状态，执行登录")
-                self.check_and_handle_login()
             if not self.driver:
                 raise Exception("浏览器连接丢失")
                 
@@ -2262,9 +2244,6 @@ class CryptoTrader:
     def Sell_no(self):
         """当NO4价格等于实时No价格时自动卖出"""
         try:
-            if self.find_login_button():
-                self.logger.warning("检测到❌未登录状态，执行登录")
-                self.check_and_handle_login()
             if not self.driver:
                 raise Exception("浏览器连接丢失")   
             # 获取当前No价格
@@ -3287,10 +3266,6 @@ class CryptoTrader:
 
     def start_auto_find_coin(self):
         """启动自动找币"""
-        # 未登录,不执行自动找币
-        if self.find_login_button():
-            self.check_and_handle_login()
-
         if self.login_running:
             self.logger.info("正在登录,退出自动找币")
             return
@@ -3300,9 +3275,6 @@ class CryptoTrader:
             self.stop_refresh_page()
             self.start_auto_find_coin_running = True
 
-            if self.find_login_button():
-                self.logger.warning("检测到❌未登录状态，执行登录")
-                self.check_and_handle_login()
             # 有持仓,点击 PORTFOLIO_BUTTON按钮,打开币对
             try: 
                 portfolio_button = self.driver.find_element(By.XPATH, XPathConfig.PORTFOLIO_BUTTON)
@@ -3385,10 +3357,6 @@ class CryptoTrader:
             self.stop_url_monitoring()
             self.stop_refresh_page()
             self.start_auto_find_coin_running = True
-            
-            if self.find_login_button():
-                self.logger.warning("检测到未登录状态，执行登录")
-                self.check_and_handle_login()
 
             # 保存原始窗口句柄，确保在整个过程中有一个稳定的引用
             self.original_window = self.driver.current_window_handle
