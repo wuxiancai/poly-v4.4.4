@@ -1544,7 +1544,7 @@ class CryptoTrader:
                 
                 time.sleep(5)
                 
-                if self.is_login_successful():
+                if self.is_login_successful() and not self.find_login_button():
                     self.logger.info("✅ 登录完成,执行click_accept_button")
                     self.click_accept_button()
 
