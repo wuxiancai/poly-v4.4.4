@@ -1484,10 +1484,12 @@ class CryptoTrader:
             metamask_button = self._find_element_with_retry(XPathConfig.METAMASK_BUTTON)
             metamask_button.click()
             time.sleep(5)
+
             # 获取屏幕尺寸
             monitor = get_monitors()[0]  # 获取主屏幕信息
             screen_width, screen_height = monitor.width, monitor.height
             time.sleep(1)
+
             # 截取屏幕右上角区域用于OCR识别
             # 区域参数格式为(left, top, width, height)
             right_top_region = (screen_width - 400, 0, 400, 600)  # 右上角500x700像素区域
@@ -1498,7 +1500,7 @@ class CryptoTrader:
             time.sleep(3)
 
             # 检查是否包含"欢迎回来!"
-            if "欢迎" in text_chi_sim or "回来" in text_chi_sim :
+            if "欢迎回来" in text_chi_sim:
                 self.logger.info("检测到MetaMask登录窗口,显示'欢迎回来!'")
                 # 输入密码
                 pyautogui.write("noneboy780308")
@@ -1548,8 +1550,8 @@ class CryptoTrader:
 
                 else:
                     self.logger.warning("❌ 登录失败,重新登录")
-                    self.check_and_handle_login()
-                
+                    return
+                        
         except Exception as e:
             self.logger.error(f"登录操作失败: {str(e)}")
             return False
@@ -1561,11 +1563,11 @@ class CryptoTrader:
         try:
             # 检查是否存在CASH值
             cash_value = self.cash_value
+            
             if cash_value is not None:
-                
+                self.logger.info(f"✅ 检测到CASH值: {cash_value}")
                 return True
             else:
-                
                 return False
         except NoSuchElementException:
             return False
@@ -1575,9 +1577,6 @@ class CryptoTrader:
         self.logger.info("开始执行click_accept_button")
         self.login_running = True
         try:
-            # 未登录,不执行click_accept_button
-            if self.find_login_button():
-                self.check_and_handle_login()
             # 等待输入框可交互
             try:
                 amount_input = self.driver.find_element(By.XPATH, XPathConfig.AMOUNT_INPUT)
@@ -1601,7 +1600,7 @@ class CryptoTrader:
             pyautogui.press('enter')
             
             self.logger.info("✅ click_accept_button执行完成")
-            self.driver.refresh()
+            
             # 启动URL监控    
             self.start_url_monitoring()
             # 启动页面刷新
