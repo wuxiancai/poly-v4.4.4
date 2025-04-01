@@ -1608,7 +1608,7 @@ class CryptoTrader:
             
         except Exception as e:
             self.logger.error(f"click_accept_button执行失败: {str(e)}")
-            self.click_accept_button()
+            
         finally:
             self.login_running = False
 
@@ -3381,10 +3381,6 @@ class CryptoTrader:
     def find_54_coin(self):
         """自动找币,线程名:self.auto_find_coin_timer"""
         self.logger.info("✅ 当前没有持仓,开始自动找币")
-        if self.login_running:
-            self.logger.info("正在登录,退出自动找币")
-            return
-
         try:
             self.stop_url_monitoring()
             self.stop_refresh_page()
@@ -3406,6 +3402,9 @@ class CryptoTrader:
             ]
             for coin in coins:
                 try:  # 为每个币种添加单独的异常处理
+                    if self.login_running:
+                        self.logger.info("正在登录,退出自动找币")
+                        return
                     coin_new_weekly_url = self.find_new_weekly_url(coin)
                     
                     if coin_new_weekly_url:
