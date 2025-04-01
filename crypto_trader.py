@@ -1561,8 +1561,13 @@ class CryptoTrader:
     def is_login_successful(self):
         """检查登录是否成功"""
         try:
-            # 检查是否存在CASH值
-            cash_value = self.cash_value
+            # 获取Cash值
+            try:
+                cash_element = self.driver.find_element(By.XPATH, XPathConfig.CASH_VALUE)
+                cash_value = cash_element.text
+            except Exception as e:
+                cash_element = self._find_element_with_retry(XPathConfig.CASH_VALUE)
+                cash_value = cash_element.text
             
             if cash_value is not None:
                 self.logger.info(f"✅ 检测到CASH值: {cash_value}")
