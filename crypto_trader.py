@@ -1539,17 +1539,36 @@ class CryptoTrader:
                 time.sleep(2)
                 # 点击 "确认" 按钮
                 pyautogui.click(confirm_button_x, confirm_button_y)  
+                
+                time.sleep(5)
+                
+                if self.is_login_successful():
+                    self.logger.info("✅ 登录完成,执行click_accept_button")
+                    self.click_accept_button()
 
-                # 直接执行click_accept_button
-                self.logger.info("✅ 登录完成,执行click_accept_button")
-                time.sleep(1)
-                self.click_accept_button()
-                return True
+                else:
+                    self.logger.warning("❌ 登录失败,重新登录")
+                    self.check_and_handle_login()
+                
         except Exception as e:
             self.logger.error(f"登录操作失败: {str(e)}")
             return False
         finally:
             self.login_running = False
+
+    def is_login_successful(self):
+        """检查登录是否成功"""
+        try:
+            # 检查是否存在CASH值
+            cash_value = self.cash_value
+            if cash_value is not None:
+                
+                return True
+            else:
+                
+                return False
+        except NoSuchElementException:
+            return False
 
     def click_accept_button(self):
         """重新登录后,需要在amount输入框输入1并确认"""
