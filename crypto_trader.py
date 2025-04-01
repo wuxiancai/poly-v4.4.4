@@ -1601,10 +1601,33 @@ class CryptoTrader:
             self.buy_confirm_button.invoke()
             time.sleep(1)
             
-            # 按ENTER确认
-            pyautogui.press('enter')
-            
-            self.logger.info("✅ click_accept_button执行完成")
+            # 获取屏幕尺寸
+            monitor = get_monitors()[0]  # 获取主屏幕信息
+            screen_width, screen_height = monitor.width, monitor.height
+            time.sleep(1)
+
+            # 截取屏幕右上角区域用于OCR识别
+            # 区域参数格式为(left, top, width, height)
+            right_top_region = (screen_width - 870, 0, 400, 870)  # 右上角500x700像素区域
+            screen = pyautogui.screenshot(region=right_top_region)
+            screen.save("screenshot.png")
+            time.sleep(2)
+            # 使用OCR识别文本
+            text_chi_sim = pytesseract.image_to_string(screen, lang='chi_sim')
+            time.sleep(3)
+
+            if "Accept" in text_chi_sim:
+                self.logger.info("检测到MetaMask弹窗,显示'Accept'")
+                # 点击 "Accept" 按钮
+                pyautogui.press('enter')
+                self.logger.info("✅ click_accept_button执行完成")
+            else:
+                # 计算 "取消" 按钮位置
+                cancel_button_x = screen_width - 170  # 同样靠右对齐
+                cancel_button_y = 610  # "确认" 按钮通常在下方
+                time.sleep(2)
+                # 点击 "取消" 按钮
+                pyautogui.click(cancel_button_x, cancel_button_y)  
             
             # 启动URL监控    
             self.start_url_monitoring()
