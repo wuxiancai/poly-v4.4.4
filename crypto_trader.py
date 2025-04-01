@@ -1608,7 +1608,8 @@ class CryptoTrader:
 
             # 截取屏幕右上角区域用于OCR识别
             # 区域参数格式为(left, top, width, height)
-            right_top_region = (screen_width - 870, 0, 400, 870)  # 右上角500x700像素区域
+            # 截图区域从上往下(0,870),从右往左(0,870),
+            right_top_region = (screen_width - 870, 0, 870, 870)  
             screen = pyautogui.screenshot(region=right_top_region)
             screen.save("screenshot.png")
             time.sleep(2)
