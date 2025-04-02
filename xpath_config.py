@@ -119,14 +119,12 @@ class XPathConfig:
     # 18.Portfolio值长期有效
     PORTFOLIO_VALUE = [
         '//button[@href="/portfolio"]//p[contains(text(), "$")]',
-        '(//span[@class="c-PJLV c-jaFKlk c-PJLV-ibdakYG-css"])[1]',
         '//a[@href="/portfolio"]//span[contains(text(), "$")]'
     ]
 
     # 19.Cash值长期有效
     CASH_VALUE = [
         '//button[.//p[text()="Cash"]]/p[contains(text(), "$")]',
-        '(//span[@class="c-PJLV c-jaFKlk c-PJLV-ibdakYG-css"])[2]',
         '//button[.//span[text()="Cash"]]/span[contains(text(), "$")]'
     ]
 
